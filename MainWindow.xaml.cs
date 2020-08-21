@@ -20,16 +20,33 @@ namespace TaskExtension
     /// </summary>
     public partial class MainWindow : Window
     {
+        public MainViewModel VM { get; }
+
         public MainWindow()
         {
             InitializeComponent();
+            if (DataContext is MainViewModel main)
+                VM = main;
         }
 
         private void btnDoTask_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button b)
-                if (b.CommandParameter is MainViewModel m)
-                    m.StartTask();
+            VM.StartTask();
+        }
+
+        private void btnDoReportTask_Click(object sender, RoutedEventArgs e)
+        {
+            VM.StartTaskProgress();
+        }
+
+        private void btnStopReportTask_Click(object sender, RoutedEventArgs e)
+        {
+            VM.CancelProgress();
+        }
+
+        private void btnStopReportTaskWithResults_Click(object sender, RoutedEventArgs e)
+        {
+            VM.StartTaskProgressWithResults();
         }
     }
 }

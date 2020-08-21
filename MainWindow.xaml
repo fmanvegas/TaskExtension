@@ -9,8 +9,58 @@
     <Window.DataContext>
         <local:MainViewModel/>
     </Window.DataContext>
-    <StackPanel>
-        <TextBlock Text="{Binding Output}"/>
-        <Button Content="Go" CommandParameter="{Binding}" Click="btnDoTask_Click"/>
-    </StackPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel>
+        <GroupBox Header="Task with Void">
+            <StackPanel>
+                <TextBlock Text="{Binding Output}"/>
+                <Button Content="Go" CommandParameter="{Binding}" Click="btnDoTask_Click"/>
+            </StackPanel>
+        </GroupBox>
+
+            <GroupBox Header="Task with live results">
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <ProgressBar Value="{Binding ProgressValueResults}"/>
+                    <TextBlock Text="{Binding ProgressValueResults}" Grid.Row="0" HorizontalAlignment="Center"/>
+                    <Grid Grid.Row="1" HorizontalAlignment="Stretch">
+                        <Button Content="Go"  Click="btnStopReportTaskWithResults_Click" Grid.Row="2" Width="100" HorizontalAlignment="Left"/>
+                        <Button Content="Stop"  Click="btnStopReportTask_Click" Grid.Row="2" Width="100" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <ListBox x:Name="lstResults" Grid.Row="2" ItemsSource="{Binding Results}"/>
+
+                </Grid>
+            </GroupBox>
+
+        </StackPanel>
+
+        <GroupBox Header="Task With Progress + Cancel" Grid.Column="1">
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+
+                <ProgressBar Value="{Binding Percentage}"/>
+                <TextBlock Text="{Binding Percentage}" Grid.Row="0" HorizontalAlignment="Center"/>
+                <Grid Grid.Row="1" HorizontalAlignment="Stretch">
+                    <Button Content="Go"  Click="btnDoReportTask_Click" Grid.Row="2" Width="100" HorizontalAlignment="Left"/>
+                    <Button Content="Stop"  Click="btnStopReportTask_Click" Grid.Row="2" Width="100" HorizontalAlignment="Right"/>
+                </Grid>
+
+            </Grid>
+        </GroupBox>
+
+    </Grid>
 </Window>
