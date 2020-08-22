@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace TaskExtension
 {
@@ -57,7 +58,8 @@ namespace TaskExtension
             MessageBox.Show($"Void Task Failed {obj.Message}");
         }
 
-        public ObservableCollection<int> Results { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<int> Results2 { get; set; } = new ObservableCollection<int>();
+        public ObservableCollection<dynamic> Results { get; set; } = new ObservableCollection<dynamic>();
 
         internal async void StartTaskProgressWithResults()
         {
@@ -66,13 +68,13 @@ namespace TaskExtension
 
 
             var progress = new Progress<dynamic>(value => {
-                Results.Add(value.Result);
+                Results.Add(new { Result = value.Result, Foreground = value.Foreground });
                 ProgressValueResults = value.Percent;
             });
 
             await Task.Run(() => LoopThroughNumbersWithReporting(100, progress, cancelSource.Token));
 
-            if (cancelSource.IsCancellationRequested)
+            if (cancelSource != null && (bool)cancelSource?.IsCancellationRequested)
                 Output = $"User Cancelled";
             else
                 Output = "Completed";
@@ -127,19 +129,33 @@ namespace TaskExtension
 
         void LoopThroughNumbersWithReporting(int numbers, IProgress<dynamic> progress, CancellationToken token)
         {
-            for (int x = 0; x < numbers; x++)
+            for (int x = 0; x <= numbers; x++)
             {
                 if (token.IsCancellationRequested)
                     break;
 
-                Thread.Sleep(300);
+                Thread.Sleep(50);
                 var percent = (x * 100) / numbers;
                 var res = x.TwoTimes();
-
-                var result = new { Result = res, Percent = percent };
+               
+                var result = new { Result = res, Percent = percent, Foreground = getBrush() };
                 progress.Report(result);
             }
 
+        }
+
+        Brush getBrush()
+        {
+            Random r = new Random();
+            var val = r.Next(100);
+
+            if (val >= 90)
+                return Brushes.Red;
+
+            if (val >= 70)
+                return Brushes.Orange;
+
+            return Brushes.Green;
         }
 
         void LoopThroughNumbersWithProgress(int numbers, IProgress<int> progress, CancellationToken token)
