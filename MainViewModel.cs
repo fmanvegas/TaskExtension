@@ -22,74 +22,49 @@ namespace TaskExtension
             
         }
 
-        internal async void StartTaskProgress()
-        {
-            cancelSource = new CancellationTokenSource();
-
-
-            var progress = new Progress<int>(percent => {
-                Percentage = percent;
-            });
-
-            await Task.Run(() => LoopThroughNumbersWithProgress(100, progress, cancelSource.Token));
-
-            if (cancelSource.IsCancellationRequested)
-                Output = $"User Cancelled";
-            else
-                Output = "Completed";
-
-            cancelSource = null;
-        }
-
-
-   
-        internal void StartTask()
-        {
-            int i = 2;
-
-            DoMyTask(i).AwaitVoid(whenVoidCompleted, whenVoidError);
-        }
-        private void whenVoidCompleted()
-        {
-            MessageBox.Show("Void Task Completed");
-        }
-        private void whenVoidError(Exception obj)
-        {
-            MessageBox.Show($"Void Task Failed {obj.Message}");
-        }
-
-        public ObservableCollection<int> Results2 { get; set; } = new ObservableCollection<int>();
+        /// <summary>
+        /// Bound to UI as dynamic
+        /// </summary>
         public ObservableCollection<dynamic> Results { get; set; } = new ObservableCollection<dynamic>();
 
+        /// <summary>
+        /// Our main work task async
+        /// </summary>
         internal async void StartTaskProgressWithResults()
         {
             cancelSource = new CancellationTokenSource();
             Results.Clear();
 
 
-            var progress = new Progress<dynamic>(value => {
+            var progressReporter = new Progress<dynamic>(value => {
                 Results.Add(new { Result = value.Result, Foreground = value.Foreground });
                 ProgressValueResults = value.Percent;
             });
 
-            await Task.Run(() => LoopThroughNumbersWithReporting(100, progress, cancelSource.Token));
-
-            if (cancelSource != null && (bool)cancelSource?.IsCancellationRequested)
-                Output = $"User Cancelled";
-            else
-                Output = "Completed";
-
-            cancelSource = null;
-
+            await Task.Run(() => LoopThroughNumbersWithReporting(100, progressReporter, cancelSource.Token, actionFinished, actionError, actionCancel));
         }
 
-        internal void CancelProgress()
+        private void actionCancel()
+        {
+            MessageBox.Show("Action Cancelled");
+        }
+        private void actionError(Exception obj)
+        {
+            MessageBox.Show(obj.Message);
+        }
+        private void actionFinished()
+        {
+            MessageBox.Show("Finished");
+            ProgressValueResults = 0;
+        }
+        /// <summary>
+        /// User wants to cancel
+        /// </summary>
+        internal void ManualCancelProgress()
         {
             cancelSource?.Cancel(true);
         }
-
        
-
 
         private int _progressValue;
 
@@ -98,50 +73,36 @@ namespace TaskExtension
             get { return _progressValue; }
             set { _progressValue = value; OnPropChange(); }
         }
-        private int _percentage;
 
-        public int Percentage
+
+        void LoopThroughNumbersWithReporting(int numbers, IProgress<dynamic> progress, CancellationToken token, Action completed, Action<Exception> error, Action cancelled)
         {
-            get { return _percentage; }
-            set { _percentage = value; OnPropChange(); }
-        }
-
-
-        private string _output = "Nothing";
-        public string Output
-        {
-            get { return _output; }
-            set { _output = value; OnPropChange(); }
-        }
-
-
-        private async Task DoMyTask(int i)
-        {
-            await Task.Run(() =>
+            try
             {
-                for (int x = 0;x < 30000; x++)
+                for (int x = 0; x <= numbers; x++)
                 {
-                    Console.WriteLine(x);
-                }
-                Output = i.TwoTimes().ToString();
-            });
-        }
+                    if (token.IsCancellationRequested)
+                        return;
 
-        void LoopThroughNumbersWithReporting(int numbers, IProgress<dynamic> progress, CancellationToken token)
-        {
-            for (int x = 0; x <= numbers; x++)
+                    Thread.Sleep(50);
+                    var percent = (x * 100) / numbers;
+                    var res = x.TwoTimes();
+
+                    var result = new { Result = res, Percent = percent, Foreground = getBrush() };
+                    progress.Report(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                error?.Invoke(ex);
+            }
+            finally
             {
                 if (token.IsCancellationRequested)
-                    break;
-
-                Thread.Sleep(50);
-                var percent = (x * 100) / numbers;
-                var res = x.TwoTimes();
-               
-                var result = new { Result = res, Percent = percent, Foreground = getBrush() };
-                progress.Report(result);
-            }
-
+                    cancelled?.Invoke();
+                else
+                    completed?.Invoke();
+            }          
         }
 
         Brush getBrush()
@@ -156,18 +117,6 @@ namespace TaskExtension
                 return Brushes.Orange;
 
             return Brushes.Green;
-        }
-
-        void LoopThroughNumbersWithProgress(int numbers, IProgress<int> progress, CancellationToken token)
-        {
-            for (int x = 0; x <= numbers; x++)
-            {
-                if (token.IsCancellationRequested)
-                    break;
-
-                Thread.Sleep(10);
-                progress.Report((x * 100) / numbers);
-            }
         }
     }
 

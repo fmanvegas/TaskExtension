@@ -29,19 +29,10 @@ namespace TaskExtension
                 VM = main;
         }
 
-        private void btnDoTask_Click(object sender, RoutedEventArgs e)
-        {
-            VM.StartTask();
-        }
-
-        private void btnDoReportTask_Click(object sender, RoutedEventArgs e)
-        {
-            VM.StartTaskProgress();
-        }
 
         private void btnStopReportTask_Click(object sender, RoutedEventArgs e)
         {
-            VM.CancelProgress();
+            VM.ManualCancelProgress();
         }
 
         private void btnStopReportTaskWithResults_Click(object sender, RoutedEventArgs e)
