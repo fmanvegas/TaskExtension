@@ -118,6 +118,43 @@ namespace TaskExtension
 
             return Brushes.Green;
         }
+
+       
+
+        public ObservableCollection<string> DTED { get; set; } = new ObservableCollection<string>();
+
+        internal async void OpenDTEDFiles(IEnumerable<string> fileNames)
+        {
+            cancelSource = new CancellationTokenSource();
+
+            List<string> dtedHolder = new List<string>();
+
+            Progress<string> dtedProgress = new Progress<string>(value => {
+
+                if (!string.IsNullOrEmpty(value))
+                    DTED.Add(value);
+
+                ProgressValueResults = (DTED.Count * 100) / fileNames.Count();
+            });
+            await Task.Run(() => CreateDTEDHolders(fileNames, dtedProgress, cancelSource.Token));
+
+
+        }
+
+        private void CreateDTEDHolders(IEnumerable<string> fileNames, IProgress<string> dtedProgress, CancellationToken token)
+        {
+            Random r = new Random();
+
+            foreach(var file in fileNames)
+            {
+                if (token.IsCancellationRequested)
+                    break;
+
+                Thread.Sleep(r.Next(1, 50));
+
+                dtedProgress.Report(file.ToUpper());
+            }
+        }
     }
 
     public static class TaskExtender

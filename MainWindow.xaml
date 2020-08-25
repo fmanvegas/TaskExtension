@@ -22,16 +22,24 @@
             <TextBlock Text="{Binding ProgressValueResults}" Grid.Row="0" HorizontalAlignment="Center"/>
             <Grid Grid.Row="1" HorizontalAlignment="Stretch">
                 <Button Content="Go"  Click="btnStopReportTaskWithResults_Click" Grid.Row="2" Width="100" HorizontalAlignment="Left"/>
+                <Button Content="DTED"  Click="btnStartDTED_Click" Grid.Row="2" Width="100" HorizontalAlignment="Center"/>
                 <Button Content="Stop"  Click="btnStopReportTask_Click" Grid.Row="2" Width="100" HorizontalAlignment="Right"/>
             </Grid>
 
-            <ListBox x:Name="lstResults" Grid.Row="2" ItemsSource="{Binding Results}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Result}" Foreground="{Binding Foreground}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <StackPanel Orientation="Horizontal" Grid.Row="2">
+                <ListBox x:Name="lstResults" Grid.Row="2" ItemsSource="{Binding Results}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Result}" Foreground="{Binding Foreground}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl HorizontalAlignment="Left" MaxWidth="500" HorizontalContentAlignment="Left" ItemsSource="{Binding DTED}" ScrollViewer.CanContentScroll="True"/>
+                </ScrollViewer>
+            </StackPanel>
+           
 
         </Grid>
     </GroupBox>

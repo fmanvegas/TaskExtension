@@ -39,5 +39,27 @@ namespace TaskExtension
         {
             VM.StartTaskProgressWithResults();
         }
+
+
+        private static Random random = new Random();
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private void btnStartDTED_Click(object sender, RoutedEventArgs e)
+        {
+            List<string> list = new List<string>();
+
+            for (int x = 0; x < 250; x++)
+            {
+                list.Add(RandomString(x + 1));
+            }
+
+
+            VM.OpenDTEDFiles(list);
+        }
     }
 }
