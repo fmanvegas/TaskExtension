@@ -57,6 +57,40 @@ namespace TaskExtension
             MessageBox.Show("Finished");
             ProgressValueResults = 0;
         }
+
+        internal async Task<bool> TaskWithErrorHandling(int v, Action<Exception> onError)
+        {
+            //do some code normally
+            try
+            {
+
+                await Task.Run(() => { 
+                
+                
+
+                for (int i = 0; i < 500000000; i++)
+                {
+                    System.Diagnostics.Debug.WriteLine($"I have written {i}");
+
+                        if (i > 10000)
+                            throw new Exception("FUCK");
+                }
+
+                });
+
+
+                if (v < 0)
+                    throw new Exception("DUR");
+
+            }
+            catch (Exception x)
+            {
+                onError?.Invoke(x);
+            }
+            return true;
+
+        }
+
         /// <summary>
         /// User wants to cancel
         /// </summary>
@@ -155,6 +189,46 @@ namespace TaskExtension
                 dtedProgress.Report(file.ToUpper());
             }
         }
+
+
+        internal async Task<bool> TaskWithCompletionSource(int v)
+        {
+            TaskCompletionSource<bool> thisMustMatchSignature = new TaskCompletionSource<bool>();
+
+            //do some code normally, put it in a TRY to catch the errors
+            //put in a await Task
+            try
+            {
+
+           await     Task.Run(() => {
+
+                    for (int i = 0; i < 50000000; i++)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"I have written {i}");
+
+                        if (i > 5000)
+                            throw new Exception("ERROR");
+                    }
+
+                });
+
+
+                if (v < 0)
+                    throw new Exception("DUR");
+
+                thisMustMatchSignature.SetResult(true);
+            }
+            catch (Exception x)
+            {
+                thisMustMatchSignature.SetException(new Exception("I caught this within TaskWithCompletionSource"));
+                System.Diagnostics.Debug.WriteLine(x.Message);
+            }
+
+            bool myResult = await thisMustMatchSignature.Task;
+
+            return myResult;
+        }
+
     }
 
     public static class TaskExtender

@@ -49,8 +49,28 @@ namespace TaskExtension
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        private void btnStartDTED_Click(object sender, RoutedEventArgs e)
+        private async void btnStartDTED_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+
+                var onError = new Action<Exception>((ex) =>{
+
+                    MessageBox.Show($"{ex.Message} was caught in btn");
+                });
+
+              // var res = await VM.TaskWithErrorHandling(-1, onError);
+                var res = await VM.TaskWithCompletionSource(-1);
+                if (res)
+                    return;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+
             List<string> list = new List<string>();
 
             for (int x = 0; x < 250; x++)
